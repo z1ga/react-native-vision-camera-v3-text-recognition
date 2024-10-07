@@ -14,12 +14,22 @@ import com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
 import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.mrousavy.camera.frameprocessor.Frame
-import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin
-import com.mrousavy.camera.frameprocessor.VisionCameraProxy
-import com.mrousavy.camera.types.Orientation
+import com.mrousavy.camera.frameprocessors.Frame
+import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin
+import com.mrousavy.camera.frameprocessors.VisionCameraProxy
+import com.mrousavy.camera.core.types.Orientation
 import java.util.ArrayList
 
+
+fun getOrientationDegrees(orientation: Orientation): Int {
+    return when (orientation) {
+        Orientation.PORTRAIT -> 0
+        Orientation.LANDSCAPE_LEFT -> 90
+        Orientation.PORTRAIT_UPSIDE_DOWN -> 180
+        Orientation.LANDSCAPE_RIGHT -> 270
+        else -> 0
+    }
+}
 
 class VisionCameraV3TextRecognitionModule(proxy : VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
   private var recognizer: TextRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -40,7 +50,7 @@ class VisionCameraV3TextRecognitionModule(proxy : VisionCameraProxy, options: Ma
         val mediaImage: Image = frame.image
         val orientation : Orientation = frame.orientation
         val array = WritableNativeArray()
-        val image = InputImage.fromMediaImage(mediaImage, orientation.toDegrees())
+        val image = InputImage.fromMediaImage(mediaImage, getOrientationDegrees(orientation))
         val task: Task<Text> = recognizer.process(image)
         val result: Text? = Tasks.await(task)
           val resultText = result?.text
